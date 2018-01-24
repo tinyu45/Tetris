@@ -71,13 +71,19 @@ public class Clay : MonoBehaviour {
 
 
 
+	/****
+	 * 四舍五入
+	 * */
+	Vector3 RoundVec(Vector3 v){
+		return new Vector3 (Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y),0);
+	}
+
 
 	/**
 	 * 
 	 * 越界判断
 	 * **/
-	bool isOverRange(Vector3 v){
-		Vector3 temp = new Vector3 (Mathf.RoundToInt(v.x),Mathf.RoundToInt(v.y),0);
+	bool isOverRange(Vector3 temp){
 		return temp.x >= 0 &&
 			temp.x < GameCtroller.width &&
 		temp.y >= 0;
@@ -91,11 +97,12 @@ public class Clay : MonoBehaviour {
 	 * */
 	bool isValidMove(){
 		foreach (Transform t in transform) {
-			if (!isOverRange (t.position))  //越界判断
+			Vector3 vt = RoundVec (t.position);
+			if (!isOverRange (vt))  //越界判断
 				return false;
 			//判断 目标位置是否已有元素
 			if (t.position.y < GameCtroller.height) {
-				Transform temp = GameCtroller.Grids [(int)t.position.x, (int)t.position.y];
+				Transform temp = GameCtroller.Grids [(int)vt.x, (int)vt.y];
 				if(temp!=null && temp.parent!=transform){
 					return false;
 				}
@@ -121,8 +128,9 @@ public class Clay : MonoBehaviour {
 			}
 		}
 		foreach (Transform t in transform) {
-			if (t.position.y < GameCtroller.height) {
-				GameCtroller.Grids [(int)t.position.x, (int)t.position.y] = t;
+			Vector3 vt = RoundVec (t.position);
+			if (vt.y < GameCtroller.height) {
+				GameCtroller.Grids [(int)vt.x, (int)vt.y] = t;
 			}
 		}
 	}

@@ -49,7 +49,7 @@ public class GameCtroller : MonoBehaviour {
 		Grids = new Transform[width, height]; //初始化格子
 		FallClay+=GenerateClay;
 		FallClay ();
-		//FallClay+= ClearFullLines;
+		FallClay+= clearFullLine;
 	}
 
 
@@ -68,35 +68,77 @@ public class GameCtroller : MonoBehaviour {
 
 
 
-	void ClearFullLines(){
+
+	void clearFullLine(){
 		for (int y = 0; y < GameCtroller.height; y++) {
-			lines.Push (y);
+			if (isFullLine (y)) {
+				for (int x = 0; x < GameCtroller.width; x++) {
+					Destroy (GameCtroller.Grids[x,y].gameObject); //清空 图像
+					GameCtroller.Grids [x, y] = null;   //对应格子置空
+				}
+				MoveaboveLines (y+1);
+			}
+		}
+	}
+
+
+	//下移 移动消除后上航
+	void MoveaboveLines(int line){
+		for (int y = line; y < GameCtroller.height; y++) {
 			for (int x = 0; x < GameCtroller.width; x++) {
-				if (GameCtroller.Grids [x, y] == null && lines.Contains(y)) {
-					lines.Pop ();
+				if (GameCtroller.Grids [x, y] != null) {
+					GameCtroller.Grids [x, y - 1] = GameCtroller.Grids [x, y];
+					GameCtroller.Grids [x, y] = null;
+					GameCtroller.Grids [x, y - 1].position = new Vector3 (GameCtroller.Grids [x, y - 1].position.x, GameCtroller.Grids [x, y - 1].position.y-1,0);
 				}
 			}
 		}
-
-
-		if (lines.Count != 0) {
-			print ("栈 元素数："+lines.Count+"栈顶:"+lines.Peek());
-		}
-
-
-		if(lines.Count>0) {
-			for (int h = lines.Peek()+1; h < GameCtroller.height; h++) {
-				for (int l = 0; l < GameCtroller.width; l++) {
-					Transform tran= GameCtroller.Grids [l, h];
-					if (tran != null) {
-						GameCtroller.Grids [l, h - lines.Count] = tran;
-						tran=null;
-						//tran.position=new Vector3(tran.position.x,tran.position.y-lines.Count,0);
-					}
-				}	
-			}
-			lines.Clear ();
-		}
 	}
+
+
+	//获取全满行
+	bool isFullLine(int y){
+		for (int x = 0; x < GameCtroller.width; x++) {
+			if (GameCtroller.Grids [x, y] == null)
+				return false;
+		}
+		return true;
+	}
+
+
+
+
+
+
+//	void ClearFullLines(){
+//		for (int y = 0; y < GameCtroller.height; y++) {
+//			lines.Push (y);
+//			for (int x = 0; x < GameCtroller.width; x++) {
+//				if (GameCtroller.Grids [x, y] == null && lines.Contains(y)) {
+//					lines.Pop ();
+//				}
+//			}
+//		}
+//
+//
+//		if (lines.Count != 0) {
+//			print ("栈 元素数："+lines.Count+"栈顶:"+lines.Peek());
+//		}
+//
+//
+//		if(lines.Count>0) {
+//			for (int h = lines.Peek()+1; h < GameCtroller.height; h++) {
+//				for (int l = 0; l < GameCtroller.width; l++) {
+//					Transform tran= GameCtroller.Grids [l, h];
+//					if (tran != null) {
+//						GameCtroller.Grids [l, h - lines.Count] = tran;
+//						tran=null;
+//						//tran.position=new Vector3(tran.position.x,tran.position.y-lines.Count,0);
+//					}
+//				}	
+//			}
+//			lines.Clear ();
+//		}
+//	}
 
 }
