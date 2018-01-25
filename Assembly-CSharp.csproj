@@ -53,6 +53,7 @@
   <ItemGroup>
      <Compile Include="Assets\scripts\Clay.cs" />
      <Compile Include="Assets\scripts\GameCtroller.cs" />
+     <Compile Include="Assets\scripts\OverCtroller.cs" />
      <Compile Include="Assets\scripts\test.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/ware/Unity 2017/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

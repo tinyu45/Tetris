@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameCtroller : MonoBehaviour {
 
 	//UI显示
 	public Text time;
 	public Text Score;
-	public GameObject GameOver;
 
 	//计时器
 	public static float timer;
@@ -50,6 +50,7 @@ public class GameCtroller : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		Screen.SetResolution (1000,800,false);
 		staus = GameStatu.PLAYING;
 		grade = 0;
 		timer = Time.time;
@@ -72,7 +73,8 @@ public class GameCtroller : MonoBehaviour {
 		if (staus == GameStatu.OVER) {
 			FallClay -= GenerateClay;
 			FallClay -= clearFullLine;
-			GameOver.SetActive (true);
+			PlayerPrefs.SetInt ("score", grade);  //保存数据
+			SceneManager.LoadScene ("scenes/Over");
 		}
 
 	}
@@ -86,6 +88,9 @@ public class GameCtroller : MonoBehaviour {
 
 
 
+	/****
+	 * 
+	 *    清除行数算法1； 循环 
 
 	void clearFullLine(){
 		for (int y = 0; y < GameCtroller.height; y++) {
@@ -95,7 +100,7 @@ public class GameCtroller : MonoBehaviour {
 					GameCtroller.Grids [x, y] = null;   //对应格子置空
 				}
 				MoveaboveLines (y+1);
-				UpdateGrade ();  //更新分数
+				UpdateGrade (1);  //更新分数
 				y--;
 			}
 		}
@@ -125,45 +130,77 @@ public class GameCtroller : MonoBehaviour {
 		return true;
 	}
 
+	*****
+	*/
+
+
+
+
+
+
+
+	/**** 
+	*       方法2 ： 借用栈实现 
+	**/
+
 
 	//更新分数
-	void UpdateGrade(){
-		grade += 1;
+	void UpdateGrade(int values){
+		grade += values;
 		Score.text = "Score：" + grade;
 	}
 
 
+	//获取满行 并存入栈
+	void GetFullLines(){
+		for (int y = 0; y < GameCtroller.height; y++) {
+			lines.Push (y);
+			for (int x = 0; x < GameCtroller.width; x++) {
+				if (GameCtroller.Grids [x, y] == null && lines.Contains(y)) {
+					lines.Pop ();
+				}
+			}
+		}
+	}
+
+	//清空满行
+	void RemoveBlocks(ref int hfl){
+		while (lines.Count != 0) {
+			if (hfl == -1) {
+				hfl = lines.Peek();
+			}
+			int y=lines.Pop();
+			for (int x = 0; x < GameCtroller.width; x++) {
+				Destroy(GameCtroller.Grids [x, y].gameObject); //清空满行 并销毁游戏对象
+				GameCtroller.Grids [x, y] = null;
+			}
+		}
+	}
+
+	//下移上行
+	void FallabovelineBlocks(int line, int count){
+		for (int y = line; y < GameCtroller.height; y++) {
+			for (int x = 0; x < GameCtroller.width; x++) {
+				if (GameCtroller.Grids[x,y] != null) {
+					GameCtroller.Grids [x, y - count] = GameCtroller.Grids[x,y];  //移动数据
+					GameCtroller.Grids [x, y]=null;                               //清空当前位置数据
+					GameCtroller.Grids [x, y - count].position=new Vector3(GameCtroller.Grids [x, y - count].position.x, GameCtroller.Grids [x, y - count].position.y-count, 0);  //移动方块
+				}
+			}	
+		}
+	}
+
+	void clearFullLine(){
+		int hfl=-1;    //hfl: high full line
+		GetFullLines (); 
+		int fulls = lines.Count;
+		RemoveBlocks (ref hfl);
+		if (fulls > 0) {  
+			FallabovelineBlocks(hfl+1, fulls);  //下移上行
+		}
+		UpdateGrade (fulls);  //更新分数
+	}
 
 
-//	void ClearFullLines(){
-//		for (int y = 0; y < GameCtroller.height; y++) {
-//			lines.Push (y);
-//			for (int x = 0; x < GameCtroller.width; x++) {
-//				if (GameCtroller.Grids [x, y] == null && lines.Contains(y)) {
-//					lines.Pop ();
-//				}
-//			}
-//		}
-//
-//
-//		if (lines.Count != 0) {
-//			print ("栈 元素数："+lines.Count+"栈顶:"+lines.Peek());
-//		}
-//
-//
-//		if(lines.Count>0) {
-//			for (int h = lines.Peek()+1; h < GameCtroller.height; h++) {
-//				for (int l = 0; l < GameCtroller.width; l++) {
-//					Transform tran= GameCtroller.Grids [l, h];
-//					if (tran != null) {
-//						GameCtroller.Grids [l, h - lines.Count] = tran;
-//						tran=null;
-//						//tran.position=new Vector3(tran.position.x,tran.position.y-lines.Count,0);
-//					}
-//				}	
-//			}
-//			lines.Clear ();
-//		}
-//	}
 
 }

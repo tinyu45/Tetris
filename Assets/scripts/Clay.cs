@@ -12,6 +12,8 @@ public class Clay : MonoBehaviour {
 		if (!isValidMove ()) {
 			print ("GEME OVER");
 			GameCtroller.staus = GameCtroller.GameStatu.OVER;
+		} else {
+			UpdateGrids ();
 		}
 	}
 	
