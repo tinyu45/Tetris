@@ -1,8 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameCtroller : MonoBehaviour {
+
+	//UI显示
+	public Text time;
+	public Text Score;
+	public GameObject GameOver;
+
+	//计时器
+	public static float timer;
+	//分数
+	private int grade;
 
 	//游戏状态枚举
 	public enum GameStatu{
@@ -18,15 +29,10 @@ public class GameCtroller : MonoBehaviour {
 	public static Fall FallClay;
 
 
-	//计时器
-	public static float timer;
-
-
 	/**
 	 *方块类型 
 	 * */
 	public GameObject[] Clays;
-
 
 
 	/**
@@ -45,18 +51,30 @@ public class GameCtroller : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		staus = GameStatu.PLAYING;
+		grade = 0;
 		timer = Time.time;
 		Grids = new Transform[width, height]; //初始化格子
 		FallClay+=GenerateClay;
 		FallClay ();
 		FallClay+= clearFullLine;
+
+		Score.text = "Score：" + grade; //初始分数
 	}
 
 
 
 	// Update is called once per frame
 	void Update () {
-		
+		int min = (int)(Time.time - timer)/60;
+		int sec = (int)(Time.time - timer) % 60;
+		//string str = string.Format ("{0:00}:{1:00}",min,sec);
+		time.text= string.Format ("Time：{0:00}:{1:00}",min,sec);
+		if (staus == GameStatu.OVER) {
+			FallClay -= GenerateClay;
+			FallClay -= clearFullLine;
+			GameOver.SetActive (true);
+		}
+
 	}
 
 
@@ -77,6 +95,8 @@ public class GameCtroller : MonoBehaviour {
 					GameCtroller.Grids [x, y] = null;   //对应格子置空
 				}
 				MoveaboveLines (y+1);
+				UpdateGrade ();  //更新分数
+				y--;
 			}
 		}
 	}
@@ -106,6 +126,11 @@ public class GameCtroller : MonoBehaviour {
 	}
 
 
+	//更新分数
+	void UpdateGrade(){
+		grade += 1;
+		Score.text = "Score：" + grade;
+	}
 
 
 
